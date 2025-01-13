@@ -30,7 +30,20 @@ class MyAppState extends ChangeNotifier {
 
   void getNext() {
     current = WordPair.random();
-    notifyListeners(); 
+    notifyListeners();
+  }
+
+  var favorites = <WordPair>[];
+  Set<WordPair> favoritesSet = {};
+  void toggleFavorite() {
+    // if(favorites.contains(current)) {
+    //   favorites.remove(current);
+    // } else {
+    //   favorites.add(current);
+    // }
+    favoritesSet.add(current);
+    print(favoritesSet);
+    notifyListeners();
   }
 }
 
@@ -40,22 +53,41 @@ class MyHomePage extends StatelessWidget {
     var appState = context.watch<MyAppState>();
     var pair = appState.current;
 
+    IconData icon;
+    if (appState.favoritesSet.contains(pair)) {
+      icon = Icons.favorite;
+    } else {
+      icon = Icons.favorite_border;
+    }
+
     return Scaffold(
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           // crossAxisAlignment: CrossAxisAlignment.center,
-        
+
           children: [
             BigCard(pair: pair),
             SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {
-                appState.getNext();
-              },
-              child: Text('Next'),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    appState.toggleFavorite();
+                  },
+                  icon: Icon(icon),
+                  label: Text('Like'),
+                ),
+                SizedBox(width: 10),
+                ElevatedButton(
+                  onPressed: () {
+                    appState.getNext();
+                  },
+                  child: Text('Next'),
+                ),
+              ],
             ),
-        
           ],
         ),
       ),
@@ -76,17 +108,14 @@ class BigCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     final style = theme.textTheme.displayMedium!.copyWith(
-      color: theme.colorScheme.onPrimary,
-      fontStyle: FontStyle.italic
-    );
+        color: theme.colorScheme.onPrimary, fontStyle: FontStyle.italic);
 
     return Card(
       color: theme.colorScheme.primary,
       child: Padding(
         padding: const EdgeInsets.all(20.0),
-        child: Text(pair.asLowerCase, 
-        style: style, 
-        semanticsLabel: "${pair.first} ${pair.second}"),
+        child: Text(pair.asLowerCase,
+            style: style, semanticsLabel: "${pair.first} ${pair.second}"),
       ),
     );
   }
